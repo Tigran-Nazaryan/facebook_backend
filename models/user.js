@@ -1,6 +1,6 @@
 'use strict';
 
-const { Model } = require('sequelize');
+import { Model } from 'sequelize';
 
 export default (sequelize, DataTypes) => {
   class User extends Model {
@@ -20,6 +20,7 @@ export default (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+    tableName: 'Users',
     timestamps: true,
   });
 
