@@ -5,6 +5,11 @@ export const registrationSchema = Joi.object({
   lastName: Joi.string().required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
-  birthday: Joi.date().iso().optional(),
-  gender: Joi.string().valid("male", "female").optional()
+  birthday: Joi.date().iso(),
+  gender: Joi.string().valid("male", "female")
+});
+
+export const loginSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).required(),
 });

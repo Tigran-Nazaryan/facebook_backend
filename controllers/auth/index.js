@@ -1,7 +1,7 @@
 import AuthService from "../../service/auth/index.js"
-import {User} from "../../models/models.js";
 
 export const registration = async (req, res, next) => {
+    console.log(req.body);
     try {
         const { email, password, firstName, lastName, birthday, gender } = req.body;
 
@@ -16,6 +16,7 @@ export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         const userData = await AuthService.login(email, password);
+        console.log("Controller login response:", userData);
         return res.json(userData);
     } catch (e) {
         next(e);
@@ -24,13 +25,12 @@ export const login = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
     try {
-        await AuthService.logout(req)
-
         res.clearCookie("accessToken", {
             httpOnly: true,
+            path: "/",
         });
 
-        return res.json({message: "User logged out successfully"});
+        return res.json({ message: "User logged out successfully" });
     } catch (e) {
         next(e);
     }
@@ -38,16 +38,13 @@ export const logout = async (req, res, next) => {
 
 export const verify = async (req, res) => {
     try {
-        const user = await User.findByPk(req.user.id, {
-            attributes: ["id"]
-        });
-
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
+        const user = await AuthService.verify(req.user.id);
 
         res.json({ user });
     } catch (err) {
+        if (err.message === "User not found") {
+            return res.status(404).json({ error: err.message });
+        }
         res.status(500).json({ error: "Server error" });
     }
 };

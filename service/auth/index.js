@@ -1,10 +1,9 @@
-import {registrationSchema} from "../../validations/registration.js";
+import {registrationSchema, loginSchema} from "../../validations/auth/index.js";
 import ApiError from "../../exceptions/apiError.js";
 import bcrypt from "bcrypt";
 import {UserDto} from "../../dtos/userDto.js";
 import TokenService from "../token/index.js";
 import {User} from "../../models/models.js";
-import {loginSchema} from "../../validations/login.js";
 
 class AuthService {
     async registration(email, password, firstName, lastName, birthday, gender) {
@@ -23,10 +22,8 @@ class AuthService {
         }
 
         const hashPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({email, password: hashPassword, firstName, lastName, birthday, gender});
-        const userDto = new UserDto(user);
-
-        return {user: userDto};
+        await User.create({email, password: hashPassword, firstName, lastName, birthday, gender});
+        return {message: "User registered successfully."};
     }
 
     async login(email, password) {
@@ -50,13 +47,26 @@ class AuthService {
 
         const userDto = new UserDto(user);
 
-        const tokens = TokenService.generateAccessToken({id: userDto.id});
+        console.log("User found:", user.email);
+        console.log("Password valid:", isPasswordValid);
 
-        return {tokens, user: userDto};
+        const accessToken = TokenService.generateAccessToken({id: userDto.id});
+
+        console.log("Generated token:", accessToken);
+
+        return {accessToken, user: userDto};
     }
 
-    async logout(req) {
-        return true;
+    async verify(userId) {
+        const user = await User.findByPk(userId, {
+            attributes: ["id"],
+        });
+
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        return user;
     }
 }
 
