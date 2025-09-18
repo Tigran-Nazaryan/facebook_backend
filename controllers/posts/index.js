@@ -1,5 +1,5 @@
-// import { postSchema } from "../../validations/post.validation.js";
 import postsService from "../../service/post/index.js";
+import { postSchema } from "../../validations/posts/index.js";
 
 export const getAll = async (req, res) => {
     try {
@@ -24,15 +24,10 @@ export const create = async (req, res) => {
     try {
         const { body, user } = req;
 
-        const { userId, ...dataToValidate } = body;
-
-        const { error } = postSchema.validate(dataToValidate);
+        const { error } = postSchema.validate(body);
         if (error) return res.status(400).json({ error: error.details[0].message });
 
-        const post = await postsService.create({
-            ...dataToValidate,
-            userId: user.id,
-        });
+        const post = await postsService.create(body, user.id);
 
         return res.status(201).json(post);
     } catch (e) {
@@ -45,6 +40,10 @@ export const update = async (req, res) => {
         const post = await postsService.getById(req.params.id);
         if (!post) return res.status(404).json({ message: "Post not found" });
 
+        if (post.authorId !== req.user.id) {
+            return res.status(403).json({ message: "You are not the author" });
+        }
+
         const updatedPost = await postsService.update(req.params.id, req.body);
         return res.status(200).json(updatedPost);
     } catch (error) {
@@ -54,9 +53,12 @@ export const update = async (req, res) => {
 
 export const remove = async (req, res) => {
     try {
-        console.log(123)
         const post = await postsService.getById(req.params.id);
         if (!post) return res.status(404).json({ message: "Post not found" });
+
+        if (post.authorId !== req.user.id) {
+            return res.status(403).json({ message: "You are not the author" });
+        }
 
         const result = await postsService.delete(req.params.id);
         return res.status(200).json(result);

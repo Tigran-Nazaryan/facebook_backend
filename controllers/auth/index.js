@@ -12,9 +12,6 @@ export const registration = async (req, res, next) => {
     }
 };
 
-// $2b$10$TNo1WcAHcl4ZyaDpb36bJuG2zjy3mjUSS/RqpTZfKitnH8cML3SAC
-// $2b$10$GrsNCBm5U58FezWNN8I6POc3Ftcj9yKwxzw56Fg6dyE4CdnXFPimS
-
 export const login = async (req, res, next) => {
     try {
         const {email, password} = req.body;

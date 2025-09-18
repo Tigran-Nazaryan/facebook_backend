@@ -1,3 +1,3 @@
 import db from "./index.js";
 
-export const {User} = db;
+export const {User, Post, PostImage, Like} = db;
