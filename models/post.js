@@ -30,6 +30,9 @@ export default (sequelize, DataTypes) => {
         sequelize,
         modelName: 'Post',
         tableName: 'Posts',
+        defaultScope: {
+            order: [['createdAt', 'DESC']],
+        },
         timestamps: true,
     });
 

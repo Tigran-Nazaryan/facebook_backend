@@ -27,7 +27,7 @@ export const create = async (req, res) => {
         const { error } = postSchema.validate(body);
         if (error) return res.status(400).json({ error: error.details[0].message });
 
-        const post = await postsService.create(body, user.id);
+        const post = await postsService.create(body, user.id, req.files);
 
         return res.status(201).json(post);
     } catch (e) {
@@ -44,7 +44,7 @@ export const update = async (req, res) => {
             return res.status(403).json({ message: "You are not the author" });
         }
 
-        const updatedPost = await postsService.update(req.params.id, req.body);
+        const updatedPost = await postsService.update(req.params.id, req.body, req.files);
         return res.status(200).json(updatedPost);
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -70,7 +70,7 @@ export const remove = async (req, res) => {
 export const like = async (req, res) => {
     try {
         const userId = req.user.id;
-        const postId = req.params.id;
+        const postId = req.params.postId;
 
         const like = await postsService.like(postId, userId);
         return res.status(201).json(like);
@@ -83,7 +83,7 @@ export const like = async (req, res) => {
 export const unLike = async (req, res) => {
     try {
         const userId = req.user.id;
-        const postId = req.params.id;
+        const postId = req.params.postId;
 
         const result = await postsService.unlike(postId, userId);
         res.status(200).json(result);
