@@ -6,8 +6,6 @@ import TokenService from "../token/index.js";
 import {User} from "../../models/models.js";
 import jwt from "jsonwebtoken";
 import MailService from "../mail/index.js";
-import dotenv from "dotenv";
-dotenv.config();
 
 class AuthService {
     async registration(email, password, firstName, lastName, birthday, gender) {

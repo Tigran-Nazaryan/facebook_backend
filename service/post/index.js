@@ -4,7 +4,7 @@ class PostsService {
     async findOrThrow(id) {
         const post = await Post.findByPk(id, {
             include: [
-                { model: User, as: "author" },
+                { model: User, as: "author", attributes: ['id', 'firstName', 'lastName'] },
                 { model: PostImage, as: "images" }
             ]
         });
@@ -30,7 +30,6 @@ class PostsService {
         const title = (body.title || "").trim();
         if (!title) throw new Error("Title is required");
 
-        // --- Если ссылки на картинки пришли через body ---
         let imagesFromUrls = [];
         if (body.images) {
             if (Array.isArray(body.images)) {
@@ -41,7 +40,7 @@ class PostsService {
         }
 
         const imagesFromFiles = files.map(file => ({
-            imageUrl: `/images/${file.filename}`, // Multer уже сохранил
+            imageUrl: `/images/${file.filename}`,
         }));
 
         const allImages = [...imagesFromUrls, ...imagesFromFiles];
@@ -87,9 +86,6 @@ class PostsService {
             await PostImage.destroy({ where: { postId: post.id } });
             await PostImage.bulkCreate(newImages);
         }
-
-        console.log("post.id:", post.id);
-        console.log("files:", files);
 
         return await post.reload({
             include: [
