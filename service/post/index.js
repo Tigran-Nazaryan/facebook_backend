@@ -16,8 +16,20 @@ class PostsService {
     async getAll() {
         return await Post.findAll({
             include: [
-                { model: User, as: "author" },
-                { model: PostImage, as: "images" }
+                { model: User, as: "author", attributes: ["id", "firstName", "lastName", "email", "coverPhoto", "isVerified", ] },
+                { model: PostImage, as: "images", attributes: ["id", "postId", "imageUrl"] },
+                {
+                    model: Like,
+                    as: "likes",
+                    attributes: ["id", "userId", "postId"],
+                    include: [
+                        {
+                            model: User,
+                            as: "user",
+                            attributes: ["id", "firstName", "lastName"],
+                        },
+                    ],
+                },
             ]
         });
     }
@@ -40,7 +52,7 @@ class PostsService {
         }
 
         const imagesFromFiles = files.map(file => ({
-            imageUrl: `/images/${file.filename}`,
+            imageUrl: `/${file.filename}`,
         }));
 
         const allImages = [...imagesFromUrls, ...imagesFromFiles];
@@ -79,7 +91,7 @@ class PostsService {
 
         if (files && files.length > 0) {
             const newImages = files.map(file => ({
-                imageUrl: `/images/${file.filename}`,
+                imageUrl: `/${file.filename}`,
                 postId: id,
             }));
 
