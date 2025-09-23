@@ -1,4 +1,4 @@
-import { Like, Post, User, PostImage, sequelize } from "../../models/models.js";
+import {Like, Post, PostImage, sequelize, User} from "../../models/models.js";
 
 class PostsService {
     async findOrThrow(id) {
@@ -115,7 +115,7 @@ class PostsService {
 
     async like(postId, userId) {
         const existingLike = await Like.findOne({ where: { postId, userId } });
-        if (existingLike) throw new Error("Post already liked by this user");
+        if (existingLike) throw new Error("Post already liked by this profile");
 
         const postExists = await Post.count({ where: { id: postId } });
         if (!postExists) throw new Error("Post not found");
