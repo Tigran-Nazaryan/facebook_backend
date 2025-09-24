@@ -6,33 +6,33 @@ import TokenService from "../token/index.js";
 import {User} from "../../models/models.js";
 import jwt from "jsonwebtoken";
 import MailService from "../mail/index.js";
+import {hashPassword} from "../../helper/index.js";
 
 class AuthService {
-    async registration(email, password, firstName, lastName, birthday, gender) {
-        const { error } = registrationSchema.validate({ email, password, firstName, lastName, birthday, gender });
+    async registration(email, password, firstName, lastName, birthday, gender, isVerified) {
+        const { error } = registrationSchema.validate({ email, password, firstName, lastName, birthday, gender, isVerified });
         if (error) throw new Error(error.details[0].message);
 
         const candidate = await User.findOne({ where: { email } });
         if (candidate) throw ApiError.BadRequestError("User already exists");
 
-        const hashPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await hashPassword(password);
         const newUser = await User.create({
             email,
-            password: hashPassword,
+            password: hashedPassword,
             firstName,
             lastName,
             birthday,
             gender,
-            isVerified: false
         });
+
         const userDto = new UserDto(newUser);
 
-        const token = jwt.sign({ email }, process.env.JWT_ACCESS_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign({ email }, process.env.JWT_ACCESS_SECRET, { expiresIn: "24h" });
         const verifyLink = `${process.env.BASE_URL}/verify?token=${token}`;
 
         await MailService.sendActivationMail(email, verifyLink);
         const accessToken = TokenService.generateAccessToken({id: newUser.id});
-
 
         return {accessToken, user: userDto};
     }
@@ -42,11 +42,9 @@ class AuthService {
         if (error) {
             throw new Error(error.details[0].message);
         }
-        const user = await User.findOne({
-            where: {
-                email: email,
-            }
-        });
+
+        const user = await User.findOne({ where: { email } });
+
         if (!user) {
             throw ApiError.BadRequestError("User with this email was not found.");
         }
@@ -121,7 +119,7 @@ class AuthService {
                 throw new Error("Invalid or expired token");
             }
 
-            user.password = await bcrypt.hash(newPassword, 10);
+            user.password = await hashPassword(newPassword);
             await user.save();
 
             return { message: "Password successfully updated" };

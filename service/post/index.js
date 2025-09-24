@@ -45,7 +45,7 @@ class PostsService {
         let imagesFromUrls = [];
         if (body.images) {
             if (Array.isArray(body.images)) {
-                imagesFromUrls = body.images.map(url => ({ imageUrl: url.trim() }));
+                imagesFromUrls = body.images.map(url => ({ imageUrl: url }));
             } else {
                 imagesFromUrls = [{ imageUrl: body.images.trim() }];
             }
@@ -117,7 +117,7 @@ class PostsService {
         const existingLike = await Like.findOne({ where: { postId, userId } });
         if (existingLike) throw new Error("Post already liked by this profile");
 
-        const postExists = await Post.count({ where: { id: postId } });
+        const postExists = await Post.findByPk({ where: { id: postId } });
         if (!postExists) throw new Error("Post not found");
 
         await Like.create({ postId, userId });

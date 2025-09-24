@@ -3,7 +3,8 @@ import {
     forgotPasswordMail,
     login,
     logout,
-    registration, resetPassword,
+    registration,
+    resetPassword,
     verify,
     verifyEmail
 } from "../../controllers/auth/index.js";

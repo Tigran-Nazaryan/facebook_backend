@@ -6,7 +6,8 @@ export const registrationSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
   birthday: Joi.date().iso(),
-  gender: Joi.string().valid("male", "female")
+  gender: Joi.string().valid("male", "female"),
+  isVerified: Joi.boolean().default(false)
 });
 
 export const loginSchema = Joi.object({
