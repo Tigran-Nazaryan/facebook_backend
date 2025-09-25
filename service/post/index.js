@@ -115,14 +115,17 @@ class PostsService {
 
     async like(postId, userId) {
         const existingLike = await Like.findOne({ where: { postId, userId } });
-        if (existingLike) throw new Error("Post already liked by this profile");
 
-        const postExists = await Post.findByPk({ where: { id: postId } });
-        if (!postExists) throw new Error("Post not found");
+        if (existingLike) {
+            await existingLike.destroy();
+            return { message: "Like removed" };
+        } else {
+            const postExists = await Post.findByPk(postId);
+            if (!postExists) throw new Error("Post not found");
 
-        await Like.create({ postId, userId });
-
-        return {message: "Post liked"}
+            await Like.create({ postId, userId });
+            return { message: "Post liked" };
+        }
     }
 
     async unlike(postId, userId) {
