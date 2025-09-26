@@ -1,9 +1,19 @@
 import {Router} from "express";
-import { userPosts} from "../../controllers/profile/index.js";
+import {
+    getProfile,
+    removeCoverPhoto,
+    updateCoverPhoto,
+    updateProfile,
+    userPosts
+} from "../../controllers/profile/index.js";
 
 const profileRouter = Router();
 
+profileRouter.get("/", getProfile);
 profileRouter.get("/posts", userPosts);
+profileRouter.put("/", updateProfile);
+profileRouter.put("/coverPhoto", updateCoverPhoto);
+profileRouter.delete("/coverPhoto", removeCoverPhoto);
 
 
 export default profileRouter;

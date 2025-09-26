@@ -11,10 +11,6 @@ export const getAll = async (req, res) => {
     }
 };
 
-export const post = async (req, res) => {
-
-}
-
 export const getById = async (req, res) => {
     try {
         const post = await postsService.getById(req.params.id);

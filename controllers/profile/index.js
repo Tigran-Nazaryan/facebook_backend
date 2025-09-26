@@ -10,3 +10,39 @@ export const userPosts = async (req, res) => {
         res.status(status).json({ message: error.message });
     }
 };
+
+export const getProfile = async (req, res) => {
+    try {
+        const user = await profileService.getProfile(req.user.id);
+        res.json(user);
+    } catch (err) {
+        res.status(400).json({error: err.message});
+    }
+};
+
+export const updateProfile = async (req, res) => {
+    try {
+        const user = await profileService.updateProfile(req.user.id, req.body);
+        res.json(user);
+    } catch (err) {
+        res.status(400).json({error: err.message});
+    }
+};
+
+export const updateCoverPhoto = async (req, res) => {
+    try {
+        const user = await profileService.updateCoverPhoto(req.user.id, req.body.coverPhoto);
+        res.json(user);
+    } catch (err) {
+        res.status(400).json({error: err.message});
+    }
+};
+
+export const removeCoverPhoto = async (req, res) => {
+    try {
+        const user = await profileService.removeCoverPhoto(req.user.id);
+        res.json(user);
+    } catch (err) {
+        res.status(400).json({error: err.message});
+    }
+};
