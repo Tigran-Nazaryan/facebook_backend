@@ -4,6 +4,7 @@ export class UserDto {
   firstName;
   lastName;
   birthday;
+  coverPhoto;
   gender;
   isVerified;
 
@@ -13,6 +14,7 @@ export class UserDto {
     this.firstName = model.firstName;
     this.lastName = model.lastName;
     this.birthday = model.birthday;
+    this.coverPhoto = model.coverPhoto;
     this.gender = model.gender;
     this.isVerified  = model.isVerified;
   }

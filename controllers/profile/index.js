@@ -25,16 +25,19 @@ export const updateProfile = async (req, res) => {
         const user = await profileService.updateProfile(req.user.id, req.body);
         res.json(user);
     } catch (err) {
-        res.status(400).json({error: err.message});
+        res.status(400).json({ error: err.message });
     }
 };
 
 export const updateCoverPhoto = async (req, res) => {
     try {
-        const user = await profileService.updateCoverPhoto(req.user.id, req.body.coverPhoto);
+        const userId = req.user.id;
+        const filePath = req.file.filename;
+
+        const user = await profileService.updateCoverPhoto(userId, filePath);
         res.json(user);
     } catch (err) {
-        res.status(400).json({error: err.message});
+        res.status(400).json({ error: err.message });
     }
 };
 
@@ -43,6 +46,6 @@ export const removeCoverPhoto = async (req, res) => {
         const user = await profileService.removeCoverPhoto(req.user.id);
         res.json(user);
     } catch (err) {
-        res.status(400).json({error: err.message});
+        res.status(400).json({ error: err.message });
     }
 };

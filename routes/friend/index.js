@@ -8,9 +8,4 @@ const friendRouter = Router();
 // friendRouter.post("/requests/:id/accept", );
 // friendRouter.post("/friends/requests/:id", );
 
-
-
-
-
-
 export default friendRouter;

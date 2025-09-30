@@ -63,7 +63,7 @@ class AuthService {
 
     async verify(userId) {
         const user = await User.findByPk(userId, {
-            attributes: ["id"],
+            attributes: ["id", "firstName", "lastName", "coverPhoto", "email"],
         });
 
         if (!user) {

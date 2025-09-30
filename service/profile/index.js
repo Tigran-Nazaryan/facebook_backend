@@ -2,7 +2,10 @@ import {Post, User, Like, PostImage} from "../../models/models.js";
 
 class ProfileService {
     async userPosts(userId) {
-        const userExists = await User.count({where: {id: userId}});
+        const userExists = await User.findByPk(userId, {
+            attributes: ["id"]
+        });
+
         if (!userExists) throw new Error("User not found");
 
         return await Post.findAll({
@@ -49,13 +52,17 @@ class ProfileService {
         });
         if (!user) throw new Error("User not found");
 
-        const allowedFields = ['firstName', 'lastName', 'email', 'coverPhoto'];
+        const allowedFields = ["firstName", "lastName", "email", "coverPhoto"];
         const updateData = {};
 
         for (const field of allowedFields) {
             if (data[field] !== undefined) {
                 updateData[field] = data[field];
             }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            throw new Error("No data to update");
         }
 
         await user.update(updateData);

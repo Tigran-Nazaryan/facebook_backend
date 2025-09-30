@@ -12,5 +12,4 @@ router.use("/posts", authMiddleware, postsRouter);
 router.use("/profile", authMiddleware, profileRouter);
 router.use("/friends", authMiddleware, friendRouter);
 
-
 export default router;
