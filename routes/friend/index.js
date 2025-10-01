@@ -2,10 +2,11 @@ import {Router} from "express";
 
 const friendRouter = Router();
 
-// friendRouter.post("/request", );
-// friendRouter.post("/requests/incoming", );
-// friendRouter.post("/requests/outgoing", );
-// friendRouter.post("/requests/:id/accept", );
-// friendRouter.post("/friends/requests/:id", );
+// friendRouter.post("/send");
+// friendRouter.get("/received/:userId");
+// friendRouter.get("/sent/:userId");
+// friendRouter.post("/:id/accept");
+// friendRouter.delete("/:id");
+// friendRouter.delete("/:friendId");
 
 export default friendRouter;
