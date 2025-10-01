@@ -2,7 +2,7 @@ import {Op} from "sequelize";
 import {User} from "../../models/models.js";
 
 class SearchService {
-    async search(query, excludeUserId = null) {
+    async search(query = "", page = 1, limit = 10,  excludeUserId = null) {
         let where = {};
 
         if (query && query.trim() !== "") {
@@ -29,12 +29,19 @@ class SearchService {
             where = { [Op.and]: [{ id: { [Op.ne]: excludeUserId } }, where] };
         }
 
+        const totalCount = await User.count({ where });
 
-        return await User.findAll({
+
+
+        const users = await User.findAll({
             where,
             attributes: ["id", "firstName", "lastName", "coverPhoto"],
-            limit: 10,
+            limit,
+            offset: (page - 1) * limit,
+            order: [["id", "ASC"]],
         });
+
+        return {users, totalCount};
     }
 }
 
