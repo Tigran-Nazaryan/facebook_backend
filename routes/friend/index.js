@@ -1,12 +1,18 @@
 import {Router} from "express";
+import {
+    acceptFriendRequest, deleteFriendRequest,
+    getReceivedRequests,
+    getSentRequests, removeFriend,
+    sendFriendRequest
+} from "../../controllers/friend/index.js";
 
 const friendRouter = Router();
 
-// friendRouter.post("/send");
-// friendRouter.get("/received/:userId");
-// friendRouter.get("/sent/:userId");
-// friendRouter.post("/:id/accept");
-// friendRouter.delete("/:id");
-// friendRouter.delete("/:friendId");
+friendRouter.post("/", sendFriendRequest);
+friendRouter.get("/received/:userId", getReceivedRequests);
+friendRouter.get("/sent/:userId", getSentRequests);
+friendRouter.post("/:id/accept", acceptFriendRequest);
+friendRouter.delete("/:id", deleteFriendRequest);
+friendRouter.delete("/:friendId/remove", removeFriend);
 
 export default friendRouter;
