@@ -9,7 +9,7 @@ export default (sequelize, DataTypes) => {
             User.hasMany(models.Like, {foreignKey: 'userId', as: 'likes'});
             User.hasMany(models.FriendRequest, {foreignKey: "senderId", as: "sentRequests"});
             User.hasMany(models.FriendRequest, {foreignKey: "receiverId", as: "receivedRequests"});
-            User.belongsToMany(User, {through: "Friend", as: "friends", foreignKey: "userId", otherKey: "friendId"});
+            User.belongsToMany(models.User, {through: "Friend", as: "friends", foreignKey: "userId", otherKey: "friendId"});
         }
     }
 

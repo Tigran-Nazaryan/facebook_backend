@@ -5,8 +5,9 @@ export const users = async (req, res) => {
         const query = req.query.q || "";
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
+        const currentUserId = req.user?.id;
 
-        const {users, totalCount} = await SearchService.search(query, page, limit);
+        const {users, totalCount} = await SearchService.search(query, page, limit, currentUserId);
 
         res.json({
             users,
