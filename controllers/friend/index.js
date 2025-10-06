@@ -52,22 +52,6 @@ export const getReceivedRequests = async (req, res) => {
     }
 };
 
-export const getSentRequests = async (req, res) => {
-    try {
-        const { userId } = req.params;
-        checkUserAccess(req.user?.id, userId);
-
-        const requests = await friendService.getSentRequests(parseInt(userId));
-
-        return res.status(200).json({ success: true, data: requests });
-    } catch (error) {
-        return res.status(error.statusCode || 500).json({
-            success: false,
-            message: error.message || 'Failed to get sent requests',
-        });
-    }
-};
-
 export const acceptFriendRequest = async (req, res) => {
     try {
         const userId = validateUser(req, req.user?.id);

@@ -1,5 +1,5 @@
-import { Op } from "sequelize";
-import {FriendRequest, User, Friend} from "../../models/models.js";
+import {Op} from "sequelize";
+import {Friend, FriendRequest, User} from "../../models/models.js";
 
 export class FriendService {
     async sendFriendRequest(senderId, receiverId) {
@@ -33,8 +33,22 @@ export class FriendService {
             throw new Error("Friend request already exists");
         }
 
-        return await FriendRequest.create({ senderId, receiverId, status: "pending" });
+        const friendRequest = await FriendRequest.create({
+            senderId,
+            receiverId,
+            status: "pending",
+        });
+
+        return {
+            id: friendRequest.id,
+            senderId: friendRequest.senderId,
+            receiverId: friendRequest.receiverId,
+            createdAt: friendRequest.createdAt,
+            updatedAt: friendRequest.updatedAt,
+            friendStatus: friendRequest.status,
+        };
     }
+
 
     async getReceivedRequests(userId) {
         return await FriendRequest.findAll({
