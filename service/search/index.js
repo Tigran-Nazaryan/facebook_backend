@@ -28,33 +28,82 @@ class SearchService {
             where = { [Op.and]: [{ id: { [Op.ne]: currentUserId } }, where] };
         }
 
+        const sentRequestsOptions = {
+            where: { receiverId: currentUserId },
+            required: false,
+        };
+
+        if (filter === "friends") {
+            sentRequestsOptions.where = {
+                ...sentRequestsOptions.where,
+                status: "accepted"
+            };
+            delete sentRequestsOptions.required;
+        } else if (filter === "received") {
+            sentRequestsOptions.where = {
+                ...sentRequestsOptions.where,
+                status:  {
+                    [Op.not]: "accepted"
+                }
+            };
+            delete sentRequestsOptions.required;
+        }
+
+        console.log("sentRequestsOptions", sentRequestsOptions);
+
         const include = [
             {
                 model: User,
                 as: "friends",
                 attributes: ["id"],
-                through: { attributes: [] },
+                through: {
+                    attributes: [],
+                },
                 required: false,
             },
             {
                 model: FriendRequest,
                 as: "sentRequests",
-                where: { receiverId: currentUserId },
-                required: false,
+                include: [
+                    {
+                        model: User,
+                        as: "sender",
+                        attributes: ["id", "firstName", "lastName", "coverPhoto"],
+                    },
+                ],
+                ...sentRequestsOptions,
             },
             {
                 model: FriendRequest,
                 as: "receivedRequests",
-                where: { senderId: currentUserId },
+                where: {
+                    senderId: currentUserId,
+                },
                 required: false,
+                include: [
+                    {
+                        model: User,
+                        as: "receiver",
+                        attributes: ["id", "firstName", "lastName", "coverPhoto"],
+                    },
+                ],
             },
         ];
 
-        const allUsers = await User.findAll({
+        const offset = (page - 1) * limit;
+
+        const { rows: allUsers, count: totalCount} = await User.findAndCountAll({
             where,
             attributes: ["id", "firstName", "lastName", "coverPhoto"],
             include,
+            limit,
+            offset,
+            group: ["User.id"]
         });
+
+        // console.log(allUsers.find(u => u.id === 17)?.toJSON(), currentUserId)
+
+        // console.log(allUsers[0])
 
         let processedUsers = allUsers.map((u) => {
             const user = u.toJSON();
@@ -74,6 +123,7 @@ class SearchService {
                     status: r.status,
                     senderId: r.senderId,
                     receiverId: r.receiverId,
+                    sender: r.sender || null,
                 };
             }
 
@@ -85,9 +135,9 @@ class SearchService {
                     status: s.status,
                     senderId: s.senderId,
                     receiverId: s.receiverId,
+                    receiver: s.receiver || null,
                 };
             }
-
 
             delete user.friends;
             delete user.sentRequests;
@@ -96,21 +146,9 @@ class SearchService {
             return { ...user, friendStatus, sentRequest, receivedRequest };
         });
 
-        if (filter === "friends") {
-            processedUsers = processedUsers.filter((u) => u.friendStatus === "accepted");
-        } else if (filter === "pending") {
-            processedUsers = processedUsers.filter((u) => u.friendStatus === "pending");
-        } else if (filter === "rejected") {
-            processedUsers = processedUsers.filter((u) => u.friendStatus === "rejected");
-        }
-
-        const totalCount = processedUsers.length;
-
-        const paginatedUsers = processedUsers.slice((page - 1) * limit, page * limit);
-
         return {
-            users: paginatedUsers,
-            totalCount,
+            users: processedUsers,
+            totalCount: totalCount.length,
             currentPage: page,
             totalPages: Math.ceil(totalCount / limit),
         };
@@ -118,4 +156,3 @@ class SearchService {
 }
 
 export default new SearchService();
-

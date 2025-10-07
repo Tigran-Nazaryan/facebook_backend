@@ -50,7 +50,8 @@ export class FriendService {
     }
 
     async acceptFriendRequest(requestId, userId) {
-        const request = await FriendRequest.findOne({ where: { id: requestId, receiverId: userId } });
+        const request = await FriendRequest.findOne({ where: { id: requestId} });
+        console.log("request", request);
         if (!request) {
             throw new Error("Friend request not found or not authorized");
         }
@@ -68,9 +69,11 @@ export class FriendService {
         const request = await FriendRequest.findOne({
             where: {
                 id: requestId,
-                [Op.or]: [{ senderId: userId }, { receiverId: userId }],
+                // [Op.or]: [{ senderId: userId }, { receiverId: userId }],
             },
         });
+
+        console.log("aoIOIASDUOIASUDOIAUSOIDUAODUOAISDU", request);
 
         if (!request) {
             throw new Error("Friend request not found or not authorized");

@@ -44,6 +44,7 @@ export const acceptFriendRequest = async (req, res) => {
         const result = await friendService.acceptFriendRequest(parseInt(requestId), userId);
         return res.status(200).json({ success: true, message: 'Friend request accepted', data: result });
     } catch (error) {
+        console.log("error", error);
         if (error.message.includes('not found') || error.message.includes('already')) {
             return res.status(400).json({ success: false, message: error.message });
         }
