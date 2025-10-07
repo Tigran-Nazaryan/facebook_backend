@@ -49,21 +49,6 @@ export class FriendService {
         };
     }
 
-
-    async getReceivedRequests(userId) {
-        return await FriendRequest.findAll({
-            where: { receiverId: userId, status: "pending" },
-            include: [{ model: User, as: "sender", attributes: ["id", "firstName", "lastName"] }],
-        });
-    }
-
-    async getSentRequests(userId) {
-        return await FriendRequest.findAll({
-            where: { senderId: userId, status: "pending" },
-            include: [{ model: User, as: "receiver", attributes: ["id", "firstName", "lastName"] }],
-        });
-    }
-
     async acceptFriendRequest(requestId, userId) {
         const request = await FriendRequest.findOne({ where: { id: requestId, receiverId: userId } });
         if (!request) {

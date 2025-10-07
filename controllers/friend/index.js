@@ -1,5 +1,5 @@
 import { FriendService } from '../../service/friend/index.js';
-import {checkUserAccess, validateUser} from "../../helper/index.js";
+import { validateUser} from "../../helper/index.js";
 
 const friendService = new FriendService();
 
@@ -33,22 +33,6 @@ export const sendFriendRequest = async (req, res) => {
         }
 
         return res.status(500).json({ success: false, message: 'Failed to send friend request' });
-    }
-};
-
-export const getReceivedRequests = async (req, res) => {
-    try {
-        const { userId } = req.params;
-        checkUserAccess(req.user?.id, userId);
-
-        const requests = await friendService.getReceivedRequests(parseInt(userId));
-
-        return res.status(200).json({ success: true, data: requests });
-    } catch (error) {
-        return res.status(error.statusCode || 500).json({
-            success: false,
-            message: error.message || 'Failed to get received requests',
-        });
     }
 };
 
