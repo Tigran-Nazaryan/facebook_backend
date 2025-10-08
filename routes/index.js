@@ -5,6 +5,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import profileRouter from "./profile/index.js";
 import friendRouter from "./friend/index.js";
 import searchRouter from "./search/index.js";
+import chatRouter from "./chat/index.js";
 
 const router = Router();
 
@@ -13,5 +14,6 @@ router.use("/posts", authMiddleware, postsRouter);
 router.use("/profile", authMiddleware, profileRouter);
 router.use("/friend", authMiddleware, friendRouter);
 router.use("/search", authMiddleware, searchRouter);
+router.use("/chat", authMiddleware, chatRouter)
 
 export default router;

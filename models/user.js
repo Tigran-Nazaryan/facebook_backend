@@ -10,6 +10,8 @@ export default (sequelize, DataTypes) => {
             User.hasMany(models.FriendRequest, {foreignKey: "senderId", as: "sentRequests"});
             User.hasMany(models.FriendRequest, {foreignKey: "receiverId", as: "receivedRequests"});
             User.belongsToMany(models.User, {through: "Friend", as: "friends", foreignKey: "userId", otherKey: "friendId"});
+            User.hasMany(models.Message, { foreignKey: "senderId", as: "sentMessages" });
+            User.hasMany(models.Message, { foreignKey: "receiverId", as: "receivedMessages" });
         }
     }
 

@@ -57,9 +57,6 @@ class SearchService {
             sentRequestsOptions.required = true;
         }
 
-        console.log("sentRequestsOptions", sentRequestsOptions);
-        console.log("receivedRequestsOptions", receivedRequestsOptions);
-
         const include = [
             {
                 model: User,
