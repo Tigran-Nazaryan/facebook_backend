@@ -1,5 +1,5 @@
-import { Op } from "sequelize";
-import { FriendRequest, User } from "../../models/models.js";
+import {Op} from "sequelize";
+import {FriendRequest, User} from "../../models/models.js";
 
 class SearchService {
     async search(query = "", page = 1, limit = 10, currentUserId = null, filter = "all") {
@@ -10,26 +10,31 @@ class SearchService {
             if (terms.length === 1) {
                 where = {
                     [Op.or]: [
-                        { firstName: { [Op.iLike]: `%${terms[0]}%` } },
-                        { lastName: { [Op.iLike]: `%${terms[0]}%` } },
+                        {firstName: {[Op.iLike]: `%${terms[0]}%`}},
+                        {lastName: {[Op.iLike]: `%${terms[0]}%`}},
                     ],
                 };
             } else {
                 where = {
                     [Op.and]: [
-                        { firstName: { [Op.iLike]: `%${terms[0]}%` } },
-                        { lastName: { [Op.iLike]: `%${terms[1]}%` } },
+                        {firstName: {[Op.iLike]: `%${terms[0]}%`}},
+                        {lastName: {[Op.iLike]: `%${terms[1]}%`}},
                     ],
                 };
             }
         }
 
         if (currentUserId) {
-            where = { [Op.and]: [{ id: { [Op.ne]: currentUserId } }, where] };
+            where = {[Op.and]: [{id: {[Op.ne]: currentUserId}}, where]};
         }
 
         const sentRequestsOptions = {
-            where: { receiverId: currentUserId },
+            where: {receiverId: currentUserId},
+            required: false,
+        };
+
+        const receivedRequestsOptions = {
+            where: {senderId: currentUserId},
             required: false,
         };
 
@@ -38,18 +43,22 @@ class SearchService {
                 ...sentRequestsOptions.where,
                 status: "accepted"
             };
-            delete sentRequestsOptions.required;
+            receivedRequestsOptions.where = {
+                ...receivedRequestsOptions.where,
+                status: "accepted"
+            };
         } else if (filter === "received") {
             sentRequestsOptions.where = {
                 ...sentRequestsOptions.where,
-                status:  {
+                status: {
                     [Op.not]: "accepted"
                 }
             };
-            delete sentRequestsOptions.required;
+            sentRequestsOptions.required = true;
         }
 
         console.log("sentRequestsOptions", sentRequestsOptions);
+        console.log("receivedRequestsOptions", receivedRequestsOptions);
 
         const include = [
             {
@@ -76,10 +85,6 @@ class SearchService {
             {
                 model: FriendRequest,
                 as: "receivedRequests",
-                where: {
-                    senderId: currentUserId,
-                },
-                required: false,
                 include: [
                     {
                         model: User,
@@ -87,23 +92,124 @@ class SearchService {
                         attributes: ["id", "firstName", "lastName", "coverPhoto"],
                     },
                 ],
+                ...receivedRequestsOptions,
             },
         ];
 
-        const offset = (page - 1) * limit;
+        let allUsers;
+        let totalCount;
 
-        const { rows: allUsers, count: totalCount} = await User.findAndCountAll({
-            where,
-            attributes: ["id", "firstName", "lastName", "coverPhoto"],
-            include,
-            limit,
-            offset,
-            group: ["User.id"]
-        });
+        if (filter === "friends") {
 
-        // console.log(allUsers.find(u => u.id === 17)?.toJSON(), currentUserId)
+            const sentFriendsQuery = await User.findAndCountAll({
+                where,
+                attributes: ["id", "firstName", "lastName", "coverPhoto"],
+                include: [
+                    {
+                        model: User,
+                        as: "friends",
+                        attributes: ["id"],
+                        through: {attributes: []},
+                        required: false,
+                    },
+                    {
+                        model: FriendRequest,
+                        as: "receivedRequests",
+                        where: {
+                            senderId: currentUserId,
+                            status: "accepted"
+                        },
+                        required: true,
+                        include: [{
+                            model: User,
+                            as: "receiver",
+                            attributes: ["id", "firstName", "lastName", "coverPhoto"],
+                        }],
+                    },
+                    {
+                        model: FriendRequest,
+                        as: "sentRequests",
+                        where: {receiverId: currentUserId},
+                        required: false,
+                        include: [{
+                            model: User,
+                            as: "sender",
+                            attributes: ["id", "firstName", "lastName", "coverPhoto"],
+                        }],
+                    },
+                ],
+                distinct: true,
+            });
 
-        // console.log(allUsers[0])
+            const receivedFriendsQuery = await User.findAndCountAll({
+                where,
+                attributes: ["id", "firstName", "lastName", "coverPhoto"],
+                include: [
+                    {
+                        model: User,
+                        as: "friends",
+                        attributes: ["id"],
+                        through: {attributes: []},
+                        required: false,
+                    },
+                    {
+                        model: FriendRequest,
+                        as: "sentRequests",
+                        where: {
+                            receiverId: currentUserId,
+                            status: "accepted"
+                        },
+                        required: true,
+                        include: [{
+                            model: User,
+                            as: "sender",
+                            attributes: ["id", "firstName", "lastName", "coverPhoto"],
+                        }],
+                    },
+                    {
+                        model: FriendRequest,
+                        as: "receivedRequests",
+                        where: {senderId: currentUserId},
+                        required: false,
+                        include: [{
+                            model: User,
+                            as: "receiver",
+                            attributes: ["id", "firstName", "lastName", "coverPhoto"],
+                        }],
+                    },
+                ],
+                distinct: true,
+            });
+
+            const userMap = new Map();
+
+            [...sentFriendsQuery.rows, ...receivedFriendsQuery.rows].forEach(user => {
+                if (!userMap.has(user.id)) {
+                    userMap.set(user.id, user);
+                }
+            });
+
+            allUsers = Array.from(userMap.values());
+            totalCount = allUsers.length;
+
+            const offset = (page - 1) * limit;
+            allUsers = allUsers.slice(offset, offset + limit);
+
+        } else {
+            const offset = (page - 1) * limit;
+
+            const result = await User.findAndCountAll({
+                where,
+                attributes: ["id", "firstName", "lastName", "coverPhoto"],
+                include,
+                limit,
+                offset,
+                distinct: true,
+            });
+
+            allUsers = result.rows;
+            totalCount = result.count;
+        }
 
         let processedUsers = allUsers.map((u) => {
             const user = u.toJSON();
@@ -117,25 +223,25 @@ class SearchService {
 
             if (user.receivedRequests && user.receivedRequests.length > 0) {
                 const r = user.receivedRequests[0];
-                friendStatus = r.status;
+                if (r.status) friendStatus = r.status;
                 receivedRequest = {
                     id: r.id,
                     status: r.status,
                     senderId: r.senderId,
                     receiverId: r.receiverId,
-                    sender: r.sender || null,
+                    receiver: r.receiver || null,
                 };
             }
 
             if (user.sentRequests && user.sentRequests.length > 0) {
                 const s = user.sentRequests[0];
-                if (!friendStatus) friendStatus = s.status;
+                if (!friendStatus && s.status) friendStatus = s.status;
                 sentRequest = {
                     id: s.id,
                     status: s.status,
                     senderId: s.senderId,
                     receiverId: s.receiverId,
-                    receiver: s.receiver || null,
+                    sender: s.sender || null,
                 };
             }
 
@@ -143,12 +249,12 @@ class SearchService {
             delete user.sentRequests;
             delete user.receivedRequests;
 
-            return { ...user, friendStatus, sentRequest, receivedRequest };
+            return {...user, friendStatus, sentRequest, receivedRequest};
         });
 
         return {
             users: processedUsers,
-            totalCount: totalCount.length,
+            totalCount: totalCount,
             currentPage: page,
             totalPages: Math.ceil(totalCount / limit),
         };
