@@ -1,44 +1,54 @@
-import { Op } from "sequelize";
+import MessageService from "../../service/chat/index.js";
+import { Friend } from "../../models/models.js";
 
-export const getMessages = async (req, res) => {
+export const messages = async (req, res) => {
     try {
-        const { userId, friendId } = req.params;
+        const userId = req.user.id;
+        const friendId = req.params.friendId;
 
-        const messages = await Message.findAll({
+        const isFriend = await Friend.findOne({
             where: {
-                [Op.or]: [
-                    { senderId: userId, receiverId: friendId },
-                    { senderId: friendId, receiverId: userId }
-                ]
+                userId,
+                friendId,
             },
-            order: [["createdAt", "ASC"]],
         });
 
-        res.json(messages);
+        if (!isFriend) {
+            return res.status(403).json({ message: "You cannot view messages with this user" });
+        }
+
+        const msgs = await MessageService.getMessages(userId, friendId);
+        res.json(msgs);
     } catch (error) {
         console.error("Error receiving messages:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
 
-export const sendMessage = async (req, res) => {
+export const send = async (req, res) => {
     try {
-        const { senderId, receiverId, message } = req.body;
+        const senderId = req.user.id;
+        const { receiverId, message } = req.body;
 
-        if (!senderId || !receiverId || !message.trim()) {
+        if (!receiverId || !message.trim()) {
             return res.status(400).json({ message: "Not enough data" });
         }
 
-        const newMessage = await Message.create({
-            senderId,
-            receiverId,
-            message,
-            createdAt: new Date(),
+        const isFriend = await Friend.findOne({
+            where: {
+                userId: senderId,
+                friendId: receiverId,
+            },
         });
 
+        if (!isFriend) {
+            return res.status(403).json({ message: "You cannot message this user" });
+        }
+
+        const newMessage = await MessageService.sendMessage(senderId, receiverId, message);
         res.status(201).json(newMessage);
     } catch (error) {
         console.error("Error sending message:", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: error.message || "Server error" });
     }
 };

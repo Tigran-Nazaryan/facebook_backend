@@ -1,5 +1,5 @@
 import {Op} from "sequelize";
-import {Friend, FriendRequest, User} from "../../models/models.js";
+import {Friend, FriendRequest} from "../../models/models.js";
 
 export class FriendService {
     async sendFriendRequest(senderId, receiverId) {
@@ -69,11 +69,8 @@ export class FriendService {
         const request = await FriendRequest.findOne({
             where: {
                 id: requestId,
-                // [Op.or]: [{ senderId: userId }, { receiverId: userId }],
             },
         });
-
-        console.log("aoIOIASDUOIASUDOIAUSOIDUAODUOAISDU", request);
 
         if (!request) {
             throw new Error("Friend request not found or not authorized");

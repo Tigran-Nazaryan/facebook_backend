@@ -1,9 +1,9 @@
 import {Router} from "express";
-import {getMessages, sendMessage} from "../../controllers/chat/index.js";
+import {messages, send} from "../../controllers/chat/index.js";
 
 const chatRouter = Router();
 
-// chatRouter.get("/:userId/:friendId", messages);
-// chatRouter.post("/", send);
+chatRouter.get("/:userId/:friendId", messages);
+chatRouter.post("/", send);
 
 export default chatRouter;

@@ -14,6 +14,6 @@ router.use("/posts", authMiddleware, postsRouter);
 router.use("/profile", authMiddleware, profileRouter);
 router.use("/friend", authMiddleware, friendRouter);
 router.use("/search", authMiddleware, searchRouter);
-router.use("/chat", authMiddleware, chatRouter)
+router.use("/message", authMiddleware, chatRouter)
 
 export default router;
