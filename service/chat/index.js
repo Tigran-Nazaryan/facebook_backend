@@ -21,18 +21,18 @@ class MessageService {
         });
     }
 
-    static async sendMessage(senderId, receiverId, message) {
-        if (!senderId || !receiverId || !message.trim()) {
-            throw new Error("Not enough data");
-        }
-
-        return await Message.create({
-            senderId,
-            receiverId,
-            message,
-            createdAt: new Date(),
-        });
-    }
+    // static async sendMessage(senderId, receiverId, message) {
+    //     if (!senderId || !receiverId || !message.trim()) {
+    //         throw new Error("Not enough data");
+    //     }
+    //
+    //     return await Message.create({
+    //         senderId,
+    //         receiverId,
+    //         message,
+    //         createdAt: new Date(),
+    //     });
+    // }
 }
 
 export default MessageService;
